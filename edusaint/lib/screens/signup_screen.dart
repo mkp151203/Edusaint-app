@@ -190,10 +190,31 @@ class _SignupScreenState extends State<SignupScreen> {
       setState(() => _isLoading = false);
 
       final data = jsonDecode(response.body);
+      
+      print('=== SIGNUP API RESPONSE ===');
+      print('Status: ${response.statusCode}');
+      print('Body: ${response.body}');
+      print('Data: $data');
+      print('Token at data["token"]: ${data["token"]}');
+      print('Token at data["data"]["token"]: ${data["data"]?["token"]}');
+      print('=========================');
+      
       if (response.statusCode == 200 || response.statusCode == 201) {
-        if (data["token"] != null) {
+        // Try multiple possible token locations
+        String? token = data["token"] ?? 
+                       data["data"]?["token"] ?? 
+                       data["access_token"];
+        
+        print('Token found: $token');
+        
+        if (token != null && token.isNotEmpty) {
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString("token", data["token"]);
+          await prefs.setString("token", token);
+          
+          final savedToken = prefs.getString("token");
+          print('SIGNUP TOKEN SAVED: $savedToken');
+        } else {
+          print('⚠️ NO TOKEN IN SIGNUP RESPONSE!');
         }
 
         Navigator.pushReplacement(

@@ -19,6 +19,16 @@ class AuthService {
       );
 
       final decoded = _safeDecode(response.body);
+      
+      // DEBUG: Print full API response
+      print('=== LOGIN API RESPONSE ===');
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      print('Decoded: $decoded');
+      print('Token location check:');
+      print('  decoded["token"]: ${decoded["token"]}');
+      print('  decoded["data"]["token"]: ${decoded["data"]?["token"]}');
+      print('========================');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {"success": true, "data": decoded};

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:edusaint/theme_provider.dart';
 import 'onboarding_screen.dart';
 import 'edit_view.dart';
@@ -14,7 +15,12 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  void _logout() {
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token'); // Clear the saved token
+    
+    if (!mounted) return;
+    
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const OnboardingScreen()),

@@ -147,13 +147,30 @@ class _LoginScreenState extends State<LoginScreen> {
                             setState(() => _isLoading = false);
 
                             if (response["success"]) {
-                              if (response["data"]["token"] != null) {
+                              print('=== LOGIN SUCCESS DEBUG ===');
+                              print('Full response: $response');
+                              print('response["data"]: ${response["data"]}');
+                              print('Checking token at response["data"]["token"]: ${response["data"]["token"]}');
+                              print('Checking token at response["data"]["data"]["token"]: ${response["data"]["data"]?["token"]}');
+                              
+                              // Try multiple possible token locations
+                              String? token = response["data"]["token"] ?? 
+                                            response["data"]["data"]?["token"] ??
+                                            response["data"]["access_token"];
+                              
+                              print('Token found: $token');
+                              
+                              if (token != null && token.isNotEmpty) {
                                 SharedPreferences prefs =
                                     await SharedPreferences.getInstance();
-                                await prefs.setString(
-                                  "token",
-                                  response["data"]["token"],
-                                );
+                                await prefs.setString("token", token);
+                                
+                                // Verify it was saved
+                                final savedToken = prefs.getString("token");
+                                print('TOKEN SAVED SUCCESSFULLY: $savedToken');
+                                print('Tokens match: ${token == savedToken}');
+                              } else {
+                                print('⚠️ NO TOKEN FOUND IN RESPONSE!');
                               }
 
                               Navigator.pushReplacement(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'Mainscaffold.dart';
+import 'MainScaffold.dart';
 
 class EdusaintView extends StatelessWidget {
   const EdusaintView({super.key});

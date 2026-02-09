@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'MainScaffold.dart';
 import 'learn_screen.dart';
 
@@ -20,6 +21,7 @@ class _HomeViewState extends State<HomeView> {
   List<Course> courses = [];
   List<ClassItem> classes = [];
   ClassItem? selectedClass;
+  String? _authToken; // Store the token
 
   final List<IconData> icons = [
     Icons.calculate,
@@ -70,16 +72,34 @@ class _HomeViewState extends State<HomeView> {
       );
     }
 
+    _initializeAuth();
+  }
+
+  Future<void> _initializeAuth() async {
+    // Get the saved token
+    final prefs = await SharedPreferences.getInstance();
+    _authToken = prefs.getString('token');
+    
+    print('=== HOME VIEW TOKEN ===');
+    print('Token loaded: $_authToken');
+    print('====================');
+    
+    if (_authToken == null || _authToken!.isEmpty) {
+      print('⚠️ NO TOKEN FOUND - User should not be here!');
+    }
+    
     loadStudentName();
     loadClasses();
   }
 
   Future<void> loadStudentName() async {
+    if (_authToken == null) return;
+    
     try {
       final res = await http.get(
         Uri.parse("https://byte.edusaint.in/api/v1/profile"),
         headers: {
-          'Authorization': 'Bearer YOUR_TOKEN_HERE',
+          'Authorization': 'Bearer $_authToken',
           'Accept': 'application/json',
         },
       );
@@ -110,11 +130,13 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Future<void> loadClasses() async {
+    if (_authToken == null) return;
+    
     try {
       final res = await http.get(
         Uri.parse('https://byte.edusaint.in/api/v1/classes'),
         headers: {
-          'Authorization': 'Bearer YOUR_TOKEN_HERE',
+          'Authorization': 'Bearer $_authToken',
           'Accept': 'application/json',
         },
       );
@@ -185,7 +207,7 @@ class _HomeViewState extends State<HomeView> {
       final res = await http.get(
         Uri.parse("https://byte.edusaint.in/api/v1/classes/$_classId/courses"),
         headers: {
-          'Authorization': 'Bearer YOUR_TOKEN_HERE',
+          'Authorization': 'Bearer ${_authToken ?? ""}',
           'Accept': 'application/json',
         },
       );
@@ -413,8 +435,6 @@ class _HomeViewState extends State<HomeView> {
       selectedIndex: 3,
       bodyBuilder: (selectedClassId) {
         final filteredCourses = courses;
-
-        final w = MediaQuery.of(context).size.width;
 
         return RefreshIndicator(
           onRefresh: () async {

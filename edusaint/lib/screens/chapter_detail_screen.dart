@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'mainscaffold.dart';
+import 'MainScaffold.dart';
 import 'topic_detail_screen.dart';
 
 class ChapterDetailScreen extends StatefulWidget {
